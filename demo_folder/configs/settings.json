@@ -1,0 +1,22 @@
+{
+  "app_name": "FileIntegrityMonitor",
+  "environment": "production",
+  "version": "1.0.0",
+  "features": {
+    "email_alerts": true,
+    "slack_notifications": false,
+    "auto_rebaseline": false,
+    "scan_interval_minutes": 60
+  },
+  "exclude_patterns": [
+    "*.tmp",
+    "*.log",
+    "__pycache__",
+    ".git"
+  ],
+  "alert_thresholds": {
+    "modified_files": 1,
+    "deleted_files": 1,
+    "added_files": 5
+  }
+}

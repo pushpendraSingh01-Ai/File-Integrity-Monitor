@@ -1,0 +1,22 @@
+Project: Cybersecurity File Integrity Monitor
+=============================================
+Version: 1.0.0
+Author: Security Team
+Date: 2025-01-01
+
+Overview:
+This tool monitors critical files and directories for unauthorised changes.
+It uses SHA-256 cryptographic hashing to detect modifications, additions,
+and deletions across a monitored directory tree.
+
+Key Features:
+- Real-time hash comparison
+- Baseline snapshot management
+- Web-based dashboard (Streamlit)
+- CSV export for audit logs
+
+Threat Model:
+- Insider threats modifying configuration files
+- Malware injecting code into scripts
+- Accidental or unauthorised file deletions
+- Web defacement attacks on static assets

@@ -1,0 +1,17 @@
+CHANGELOG
+=========
+
+[v1.0.0] - 2025-01-01
+  - Initial release
+  - SHA-256 baseline generation
+  - Integrity scan with Modified/Added/Deleted detection
+  - Streamlit web dashboard
+
+[v0.9.0] - 2024-12-15
+  - Beta release for internal testing
+  - Added chunked file reading for large file support
+  - Fixed cross-platform path handling (posix slashes)
+
+[v0.8.0] - 2024-11-20
+  - Prototype with basic hash comparison
+  - CLI-only interface

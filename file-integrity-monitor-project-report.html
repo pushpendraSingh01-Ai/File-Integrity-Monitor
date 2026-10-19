@@ -1,0 +1,653 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>File Integrity Monitor — Project Report</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #1f2328;
+    background: #ffffff;
+    padding: 40px 20px 60px;
+  }
+
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  /* ── Cover ── */
+  .cover {
+    text-align: center;
+    padding: 48px 0 40px;
+    border-bottom: 2px solid #e5e7eb;
+    margin-bottom: 40px;
+  }
+  .cover .badge {
+    display: inline-block;
+    background: #eff6ff;
+    color: #3b82d4;
+    border: 1px solid #bfdbfe;
+    border-radius: 20px;
+    padding: 4px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .cover h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1f2328;
+    line-height: 1.25;
+    margin-bottom: 10px;
+  }
+  .cover .subtitle {
+    font-size: 1rem;
+    color: #57606a;
+    margin-bottom: 28px;
+  }
+  .meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 32px;
+    text-align: left;
+    max-width: 420px;
+    margin: 0 auto;
+    background: #f7f8fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 18px 24px;
+  }
+  .meta-grid .label { font-size: 11px; color: #57606a; text-transform: uppercase; letter-spacing: 0.05em; }
+  .meta-grid .value { font-weight: 600; color: #1f2328; margin-top: 1px; }
+
+  /* ── Sections ── */
+  h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #1f2328;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 6px;
+    margin: 36px 0 14px;
+  }
+  h3 {
+    font-size: 0.97rem;
+    font-weight: 700;
+    color: #1f2328;
+    margin: 22px 0 8px;
+  }
+  p { margin-bottom: 10px; color: #1f2328; }
+
+  /* ── Tables ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 13px;
+  }
+  thead th {
+    background: #f7f8fa;
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 700;
+    border-bottom: 2px solid #d0d7de;
+    white-space: nowrap;
+  }
+  tbody td {
+    padding: 7px 12px;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+
+  /* ── Code blocks ── */
+  pre {
+    background: #f6f8fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-size: 12.5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    overflow-x: auto;
+    margin: 12px 0;
+    line-height: 1.6;
+  }
+  code {
+    background: #f0f2f4;
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-size: 12.5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  /* ── Info boxes ── */
+  .info-box {
+    background: #f7f8fa;
+    border-left: 4px solid #3b82d4;
+    border-radius: 0 6px 6px 0;
+    padding: 12px 16px;
+    margin: 14px 0;
+    font-size: 13px;
+  }
+  .warn-box {
+    background: #fffbeb;
+    border-left: 4px solid #f59e0b;
+    border-radius: 0 6px 6px 0;
+    padding: 12px 16px;
+    margin: 14px 0;
+    font-size: 13px;
+  }
+
+  /* ── Status badges ── */
+  .badge-red    { background:#ffebe9; color:#cf222e; padding:2px 9px; border-radius:10px; font-weight:600; font-size:12px; }
+  .badge-yellow { background:#fff8c5; color:#9a6700; padding:2px 9px; border-radius:10px; font-weight:600; font-size:12px; }
+  .badge-grey   { background:#f6f8fa; color:#57606a; padding:2px 9px; border-radius:10px; font-weight:600; font-size:12px; border:1px solid #d0d7de; }
+  .badge-green  { background:#dafbe1; color:#1a7f37; padding:2px 9px; border-radius:10px; font-weight:600; font-size:12px; }
+  .badge-blue   { background:#eff6ff; color:#3b82d4; padding:2px 9px; border-radius:10px; font-weight:600; font-size:12px; }
+
+  /* ── Feature cards ── */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 14px 0;
+  }
+  .feature-card {
+    background: #f7f8fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .feature-card .icon { font-size: 1.4rem; margin-bottom: 6px; }
+  .feature-card .title { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+  .feature-card .desc { font-size: 12.5px; color: #57606a; line-height: 1.5; }
+
+  /* ── Architecture diagram ── */
+  .arch-box {
+    background: #f7f8fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12.5px;
+    line-height: 1.8;
+    margin: 14px 0;
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  /* ── Numbered list ── */
+  ol, ul { padding-left: 22px; margin: 8px 0 12px; }
+  li { margin-bottom: 5px; }
+
+  /* ── Section number label ── */
+  .sec-num {
+    display: inline-block;
+    background: #1f2328;
+    color: #fff;
+    border-radius: 4px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  /* ── Divider ── */
+  hr { border: none; border-top: 1px solid #e5e7eb; margin: 32px 0; }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    font-size: 11px;
+    color: #57606a;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 18px;
+    margin-top: 48px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  
+  <div class="cover">
+    <div class="badge">Cybersecurity Project Report</div>
+    <h1>🛡️ File Integrity Monitor</h1>
+    <p class="subtitle">A Web-Based File Tampering Detection System Using SHA-256 Cryptographic Hashing</p>
+    <div class="meta-grid">
+      <div>
+        <div class="label">Technology</div>
+        <div class="value">Python 3 · Streamlit</div>
+      </div>
+      <div>
+        <div class="label">Domain</div>
+        <div class="value">Cybersecurity / FIM</div>
+      </div>
+      <div>
+        <div class="label">Algorithm</div>
+        <div class="value">SHA-256 (hashlib)</div>
+      </div>
+      <div>
+        <div class="label">Interface</div>
+        <div class="value">Interactive Web Dashboard</div>
+      </div>
+      <div>
+        <div class="label">Main File</div>
+        <div class="value">File_Integrity_Monitor.py</div>
+      </div>
+      <div>
+        <div class="label">Dependencies</div>
+        <div class="value">streamlit, stdlib only</div>
+      </div>
+    </div>
+  </div>
+
+  
+  <h2><span class="sec-num">1</span> Abstract</h2>
+  <p>
+    This project presents a <strong>File Integrity Monitor (FIM)</strong> — a cybersecurity tool that
+    detects unauthorised or unexpected changes to files within a monitored directory. The system
+    computes SHA-256 cryptographic hashes of all files at a trusted point in time (the
+    <em>baseline</em>) and subsequently compares fresh hashes against that baseline to identify
+    <strong>modified</strong>, <strong>added</strong>, and <strong>deleted</strong> files.
+  </p>
+  <p>
+    The tool is delivered as a fully interactive web dashboard built with Python and Streamlit,
+    requiring no database or external infrastructure. It includes real-time Auto-Scan Watch Mode,
+    a persistent Scan History log, bar and line chart visualisations, CSV export, and an
+    educational sidebar — making it suitable both as a practical security utility and as a
+    demonstrable academic project.
+  </p>
+
+  
+  <h2><span class="sec-num">2</span> Introduction</h2>
+  <p>
+    In modern computing environments, files are constantly at risk of tampering — whether from
+    malware, insider threats, misconfiguration, or accidental modification. Detecting such changes
+    quickly is a core requirement of security frameworks including <strong>PCI-DSS</strong>,
+    <strong>HIPAA</strong>, and <strong>SOC 2</strong>, all of which mandate file integrity
+    monitoring as a control measure.
+  </p>
+  <p>
+    A File Integrity Monitor addresses this by maintaining a cryptographic fingerprint of every
+    monitored file. Because SHA-256 is a one-way function with an astronomically low collision
+    probability, any change to a file — even a single character — produces a completely different
+    hash value. This property, known as the <strong>avalanche effect</strong>, makes hash-based
+    FIMs highly reliable for change detection.
+  </p>
+  <p>
+    This project implements a FIM entirely in Python using only the standard library for the
+    core logic, with Streamlit providing the web-based user interface.
+  </p>
+
+  
+  <h2><span class="sec-num">3</span> Project Objectives</h2>
+  <ol>
+    <li>Implement SHA-256 file hashing in Python using efficient chunked binary reading.</li>
+    <li>Build a baseline generation system that recursively snapshots an entire directory tree.</li>
+    <li>Implement an integrity comparison engine that classifies each file as Clean, Modified, Added, or Deleted.</li>
+    <li>Deliver results through an interactive, colour-coded web dashboard built with Streamlit.</li>
+    <li>Add Auto-Scan Watch Mode for continuous, automated monitoring without user interaction.</li>
+    <li>Maintain a persistent Scan History log and visualise violation trends over time.</li>
+    <li>Keep dependencies minimal — <code>streamlit</code> and Python's standard library only.</li>
+  </ol>
+
+  
+  <h2><span class="sec-num">4</span> Background &amp; Theory</h2>
+
+  <h3>4.1 Cryptographic Hashing</h3>
+  <p>
+    A cryptographic hash function maps an input of arbitrary size to a fixed-size output (digest).
+    SHA-256 (Secure Hash Algorithm 256-bit) is a member of the SHA-2 family standardised by NIST.
+    It produces a 256-bit (64 hexadecimal character) digest and has the following properties
+    relevant to integrity monitoring:
+  </p>
+  <table>
+    <thead><tr><th>Property</th><th>Description</th><th>Relevance to FIM</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Deterministic</strong></td><td>Same input always produces same output</td><td>Baseline hashes can be reproduced and compared</td></tr>
+      <tr><td><strong>Avalanche Effect</strong></td><td>Tiny input change → completely different digest</td><td>Even a 1-character edit is detected</td></tr>
+      <tr><td><strong>Pre-image Resistance</strong></td><td>Cannot reverse-engineer the file from its hash</td><td>Safe to store hashes publicly</td></tr>
+      <tr><td><strong>Collision Resistance</strong></td><td>Computationally infeasible to find two files with same hash</td><td>False negatives are practically impossible</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.2 Avalanche Effect — Demonstration</h3>
+  <div class="info-box">
+    <strong>Input A:</strong> <code>hello world</code><br />
+    <strong>SHA-256 A:</strong> <code>b94d27b9934d3e08a52e52d7da7dabfac484efe04294e576...</code><br /><br />
+    <strong>Input B:</strong> <code>Hello world</code>  ← one character changed (h → H)<br />
+    <strong>SHA-256 B:</strong> <code>a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b...</code><br /><br />
+    The two digests share <strong>zero</strong> common leading characters — this is the avalanche effect in action.
+  </div>
+
+  <h3>4.3 Chunked File Reading</h3>
+  <p>
+    Rather than loading an entire file into memory before hashing, the implementation reads
+    files in <strong>64 KB chunks</strong>. This keeps memory usage constant regardless of
+    file size, allowing the FIM to scan multi-gigabyte files without performance degradation.
+  </p>
+  <pre>hasher = hashlib.sha256()
+with open(filepath, "rb") as fh:
+    while chunk := fh.read(65_536):   # 64 KB at a time
+        hasher.update(chunk)
+return hasher.hexdigest()</pre>
+
+  
+  <h2><span class="sec-num">5</span> System Design &amp; Architecture</h2>
+
+  <h3>5.1 High-Level Architecture</h3>
+  <div class="arch-box">File_Integrity_Monitor.py
+│
+├── Core Logic Layer
+│   ├── compute_sha256()      ← chunked binary read → hex digest
+│   ├── scan_directory()      ← rglob walk → {rel_path: hash} dict
+│   ├── compare_hashes()      ← set-union diff → result rows
+│   ├── load_baseline()       ← reads baseline.json
+│   ├── save_baseline()       ← writes baseline.json
+│   ├── load_history()        ← reads scan_history.json
+│   └── append_history()      ← appends scan summary to history
+│
+├── UI Components Layer
+│   ├── render_sidebar()      ← Watch Mode controls + explainer
+│   ├── render_results()      ← metrics + alert + chart + table + CSV
+│   ├── render_bar_chart()    ← current scan breakdown chart
+│   ├── render_history_section() ← trend chart + history table
+│   └── render_alert_banner() ← green / red alert card
+│
+└── Orchestration
+    ├── run_scan()            ← shared scan logic (manual + auto)
+    └── main()                ← Streamlit page entry point</div>
+
+  <h3>5.2 Data Flow</h3>
+  <table>
+    <thead><tr><th>Step</th><th>Action</th><th>Output</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>User sets directory path</td><td>Validated directory string</td></tr>
+      <tr><td>2</td><td>Generate Baseline clicked</td><td><code>baseline.json</code> — map of {path: sha256}</td></tr>
+      <tr><td>3</td><td>Files changed externally</td><td>File system state diverges from baseline</td></tr>
+      <tr><td>4</td><td>Scan triggered (manual or auto)</td><td>Fresh {path: sha256} dict computed</td></tr>
+      <tr><td>5</td><td>compare_hashes() runs</td><td>List of result rows with status labels</td></tr>
+      <tr><td>6</td><td>Results stored in session_state</td><td>Survives widget re-runs (filter changes)</td></tr>
+      <tr><td>7</td><td>append_history() runs</td><td>Summary appended to <code>scan_history.json</code></td></tr>
+      <tr><td>8</td><td>Dashboard renders</td><td>Metrics, alert, chart, table, CSV export</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.3 File Structure</h3>
+  <table>
+    <thead><tr><th>File</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>File_Integrity_Monitor.py</code></td><td>Main application — all logic and UI</td></tr>
+      <tr><td><code>baseline.json</code></td><td>Auto-generated trusted hash snapshot</td></tr>
+      <tr><td><code>scan_history.json</code></td><td>Auto-generated persistent scan log (max 50 entries)</td></tr>
+      <tr><td><code>demo_folder/</code></td><td>Test directory with sample files across 3 sub-folders</td></tr>
+    </tbody>
+  </table>
+
+  
+  <h2><span class="sec-num">6</span> Features &amp; Implementation</h2>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="icon">⚙️</div>
+      <div class="title">Baseline Generation</div>
+      <div class="desc">Recursively scans a directory with <code>Path.rglob()</code>, hashes every file, and saves results to <code>baseline.json</code> as a portable JSON map using relative forward-slash paths.</div>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🔍</div>
+      <div class="title">Integrity Scan</div>
+      <div class="desc">Re-hashes all files, performs a set-union comparison against the baseline, and classifies every file as Clean, Modified, Added, or Deleted.</div>
+    </div>
+    <div class="feature-card">
+      <div class="icon">📊</div>
+      <div class="title">Metric Cards + Bar Chart</div>
+      <div class="desc">Five summary metric cards (Total, Clean, Modified, Added, Deleted) with delta indicators, plus a bar chart breakdown of the current scan's status distribution.</div>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🚨</div>
+      <div class="title">Alert Banner</div>
+      <div class="desc">A prominent red error banner fires automatically when any violations are detected. A green success banner confirms when all files are clean.</div>
+    </div>
+    <div class="feature-card">
+      <div class="icon">📋</div>
+      <div class="title">Results Table + Filter</div>
+      <div class="desc">An HTML table with colour-coded status badges, shortened hash previews, and a file path column. A dropdown filter narrows results by status category.</div>
+    </div>
+    <div class="feature-card">
+      <div class="icon">⬇️</div>
+      <div class="title">CSV Export</div>
+      <div class="desc">One-click export of the current filtered results as a timestamped CSV file — ready for audit reports or evidence submission.</div>
+    </div>
+    <div class="feature-card">
+      <div class="icon">⚡</div>
+      <div class="title">Auto-Scan Watch Mode</div>
+      <div class="desc">A sidebar toggle enables continuous monitoring. A configurable interval slider (10s–5min) controls the scan frequency. A live countdown timer updates every second.</div>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🕓</div>
+      <div class="title">Scan History Log</div>
+      <div class="desc">Every scan appends a summary to <code>scan_history.json</code> (capped at 50 entries). A trend line chart and expandable history table appear at the bottom of the dashboard.</div>
+    </div>
+  </div>
+
+  
+  <h2><span class="sec-num">7</span> Status Classification Logic</h2>
+  <table>
+    <thead><tr><th>Status</th><th>Condition</th><th>Threat Represented</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="badge-red">🔴 Modified</span></td>
+        <td>File exists in both baseline and current scan, but hashes differ</td>
+        <td>File content tampered — malware injection, config manipulation</td>
+      </tr>
+      <tr>
+        <td><span class="badge-yellow">🟡 Added</span></td>
+        <td>File present in current scan but absent from baseline</td>
+        <td>Unauthorised file dropped — malware payload, backdoor</td>
+      </tr>
+      <tr>
+        <td><span class="badge-grey">⚪ Deleted</span></td>
+        <td>File present in baseline but absent from current scan</td>
+        <td>File removed — log wiping, evidence destruction, sabotage</td>
+      </tr>
+      <tr>
+        <td><span class="badge-green">🟢 Clean</span></td>
+        <td>File present in both; hashes match exactly</td>
+        <td>No change — file integrity confirmed</td>
+      </tr>
+    </tbody>
+  </table>
+
+  
+  <h2><span class="sec-num">8</span> Test Environment — Demo Folder</h2>
+  <p>A structured demo directory was created to facilitate testing across all detection categories:</p>
+  <table>
+    <thead><tr><th>File</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>configs/app_config.ini</code></td><td>Server/DB config — ideal for "Modified" scenario (change <code>debug=false</code> to <code>debug=true</code>)</td></tr>
+      <tr><td><code>configs/settings.json</code></td><td>Feature flags and alert thresholds</td></tr>
+      <tr><td><code>docs/project_overview.txt</code></td><td>Project documentation file</td></tr>
+      <tr><td><code>docs/changelog.txt</code></td><td>Version history — good "Deleted" demo target</td></tr>
+      <tr><td><code>docs/access_log.txt</code></td><td>Access log — simulates log wiping when deleted</td></tr>
+      <tr><td><code>scripts/backup.py</code></td><td>Python script — good "Modified script" demo target</td></tr>
+      <tr><td><code>scripts/deploy.sh</code></td><td>Bash deploy script — simulates critical script tampering</td></tr>
+    </tbody>
+  </table>
+
+  <h3>8.1 Test Scenarios</h3>
+  <table>
+    <thead><tr><th>Scenario</th><th>Action</th><th>Expected Detection</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Config tampering</td>
+        <td>Edit <code>app_config.ini</code> — change any value</td>
+        <td><span class="badge-red">🔴 Modified</span></td>
+      </tr>
+      <tr>
+        <td>Malware dropped</td>
+        <td>Create <code>scripts/malware.py</code></td>
+        <td><span class="badge-yellow">🟡 Added</span></td>
+      </tr>
+      <tr>
+        <td>Log wiping</td>
+        <td>Delete <code>docs/access_log.txt</code></td>
+        <td><span class="badge-grey">⚪ Deleted</span></td>
+      </tr>
+      <tr>
+        <td>No change</td>
+        <td>Scan immediately after baseline</td>
+        <td><span class="badge-green">🟢 Clean</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  
+  <h2><span class="sec-num">9</span> Auto-Scan Watch Mode — Design</h2>
+  <p>
+    Watch Mode implements a continuous monitoring loop using Streamlit's <code>st.rerun()</code>
+    mechanism. When enabled, the system:
+  </p>
+  <ol>
+    <li>Runs an immediate first scan upon activation.</li>
+    <li>Records the scan timestamp in <code>st.session_state</code>.</li>
+    <li>Displays a live countdown timer (updated every second via <code>time.sleep(1)</code>).</li>
+    <li>When the countdown reaches zero, runs a fresh scan and calls <code>st.rerun()</code> to refresh the dashboard.</li>
+    <li>The loop continues until the user disables the toggle.</li>
+  </ol>
+  <div class="info-box">
+    <strong>Available intervals:</strong> 10s · 15s · 30s · 60s · 2 minutes · 5 minutes<br />
+    <strong>State persistence:</strong> Results are stored in <code>st.session_state</code> so they survive widget interactions between scans.
+  </div>
+  <div class="warn-box">
+    <strong>Note:</strong> The manual scan button is automatically disabled while Watch Mode is active to prevent conflicting scan operations.
+  </div>
+
+  
+  <h2><span class="sec-num">10</span> Session State Management</h2>
+  <p>
+    Streamlit re-runs the entire script from top to bottom on every user interaction
+    (button click, dropdown change, toggle flip). Without careful state management, scan
+    results would be lost every time the user interacts with a widget.
+  </p>
+  <p>
+    The solution uses <code>st.session_state</code> as an in-memory key-value store:
+  </p>
+  <table>
+    <thead><tr><th>Key</th><th>Type</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>scan_results</code></td><td>list[dict]</td><td>Latest scan result rows — persists across filter changes</td></tr>
+      <tr><td><code>scan_directory</code></td><td>str</td><td>Directory that was last scanned</td></tr>
+      <tr><td><code>watch_enabled</code></td><td>bool</td><td>Watch Mode on/off state</td></tr>
+      <tr><td><code>watch_interval</code></td><td>int</td><td>Selected auto-scan interval in seconds</td></tr>
+      <tr><td><code>watch_last_scan</code></td><td>float</td><td>Unix timestamp of the last auto-scan</td></tr>
+    </tbody>
+  </table>
+
+  
+  <h2><span class="sec-num">11</span> Technologies &amp; Libraries</h2>
+  <table>
+    <thead><tr><th>Library</th><th>Source</th><th>Usage</th></tr></thead>
+    <tbody>
+      <tr><td><code>streamlit</code></td><td>pip install</td><td>Web dashboard framework — UI, widgets, charts, session state</td></tr>
+      <tr><td><code>hashlib</code></td><td>Python stdlib</td><td>SHA-256 hash computation</td></tr>
+      <tr><td><code>json</code></td><td>Python stdlib</td><td>Read/write baseline.json and scan_history.json</td></tr>
+      <tr><td><code>pathlib</code></td><td>Python stdlib</td><td>Cross-platform recursive directory walking</td></tr>
+      <tr><td><code>os</code></td><td>Python stdlib</td><td>Directory validation (<code>os.path.isdir</code>)</td></tr>
+      <tr><td><code>time</code></td><td>Python stdlib</td><td>Countdown timer for Watch Mode</td></tr>
+      <tr><td><code>datetime</code></td><td>Python stdlib</td><td>Timestamps on scan results and history entries</td></tr>
+      <tr><td><code>pandas</code></td><td>Bundled with Streamlit</td><td>DataFrame for bar/line chart rendering</td></tr>
+    </tbody>
+  </table>
+
+  
+  <h2><span class="sec-num">12</span> Security Considerations</h2>
+
+  <h3>12.1 Strengths</h3>
+  <ul>
+    <li><strong>SHA-256 collision resistance</strong> — practically impossible to create a modified file with the same hash, ensuring no tampering goes undetected.</li>
+    <li><strong>Chunked reading</strong> — prevents memory exhaustion attacks through large files.</li>
+    <li><strong>Relative path storage</strong> — baseline is directory-agnostic and portable.</li>
+    <li><strong>Permission-safe</strong> — unreadable files are silently skipped rather than causing crashes.</li>
+  </ul>
+
+  <h3>12.2 Limitations &amp; Future Improvements</h3>
+  <table>
+    <thead><tr><th>Limitation</th><th>Potential Improvement</th></tr></thead>
+    <tbody>
+      <tr><td>Baseline file itself could be tampered</td><td>Sign the baseline with HMAC or store it on a separate read-only location</td></tr>
+      <tr><td>No real-time filesystem event hook</td><td>Integrate OS-level watchers (<code>watchdog</code> library) for instant notification</td></tr>
+      <tr><td>Local dashboard only</td><td>Add email / Slack alerting via SMTP or webhook when violations are detected</td></tr>
+      <tr><td>No user authentication</td><td>Add login protection before deploying on a shared server</td></tr>
+      <tr><td>SHA-256 is not HMAC</td><td>Use HMAC-SHA256 with a secret key to also authenticate the hash source</td></tr>
+    </tbody>
+  </table>
+
+  
+  <h2><span class="sec-num">13</span> Setup &amp; Usage</h2>
+
+  <h3>13.1 Installation</h3>
+  <pre>pip install streamlit
+streamlit run File_Integrity_Monitor.py</pre>
+  <p>The browser opens automatically at <code>http://localhost:8501</code>.</p>
+
+  <h3>13.2 Workflow</h3>
+  <ol>
+    <li>Enter the full path of the directory to monitor in the <strong>"📁 Directory to Monitor"</strong> field.</li>
+    <li>Click <strong>⚙️ Generate Baseline</strong> — creates <code>baseline.json</code> with SHA-256 hashes of all files.</li>
+    <li>Click <strong>🔍 Run Integrity Scan</strong> — compares current state against the baseline.</li>
+    <li>Review metric cards, alert banner, bar chart, and results table.</li>
+    <li>Use the status filter dropdown to narrow results by category.</li>
+    <li>Click <strong>⬇️ Export Results as CSV</strong> for reporting.</li>
+    <li>Enable <strong>Watch Mode</strong> in the sidebar for continuous automated monitoring.</li>
+    <li>Scroll to the bottom to review <strong>Scan History</strong> and violation trend chart.</li>
+  </ol>
+
+  
+  <h2><span class="sec-num">14</span> Conclusion</h2>
+  <p>
+    This project successfully implements a fully functional, web-based File Integrity Monitor
+    that demonstrates core cybersecurity principles including cryptographic hashing, the
+    avalanche effect, baseline-comparison integrity checking, and continuous monitoring.
+  </p>
+  <p>
+    The tool is practical, requiring only a single Python file and one pip install to operate.
+    It covers all three NIST-defined integrity event categories (modification, addition, deletion),
+    provides clear visual feedback through colour-coded alerts and charts, and maintains a
+    persistent audit trail through the scan history log.
+  </p>
+  <p>
+    The addition of Auto-Scan Watch Mode elevates the project beyond a simple utility into a
+    genuine near-real-time monitoring system, demonstrating how cryptographic hashing can be
+    applied continuously to protect a file system against tampering — the same principle used
+    by enterprise security products such as Tripwire, AIDE, and AWS CloudTrail.
+  </p>
+
+  <hr />
+
+  
+  <h2><span class="sec-num">R</span> References</h2>
+  <ol>
+    <li>NIST FIPS PUB 180-4 — <em>Secure Hash Standard (SHS)</em>, National Institute of Standards and Technology, 2015.</li>
+    <li>OWASP — <em>File Integrity Monitoring</em>, OWASP Foundation. Available at: owasp.org</li>
+    <li>PCI Security Standards Council — <em>PCI-DSS Requirement 11.5: Deploy a change-detection mechanism</em>, v4.0, 2022.</li>
+    <li>Python Software Foundation — <em>hashlib — Secure hashes and message digests</em>, Python 3 Documentation.</li>
+    <li>Streamlit Inc. — <em>Streamlit Documentation</em>. Available at: docs.streamlit.io</li>
+  </ol>
+
+  <div class="footer">
+    File Integrity Monitor  ·  Cybersecurity Project Report  ·  Built with Python &amp; Streamlit
+    <br /><br />Made with IBM Bob
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,12 @@
+# File Integrity Monitor — Python Dependencies
+# =============================================
+# Install all dependencies with:
+#   pip install -r requirements.txt
+#
+# Then run the app with:
+#   streamlit run File_Integrity_Monitor.py
+#
+# All other imports (hashlib, json, pathlib, os, time, datetime)
+# are part of Python's standard library and require no installation.
+
+streamlit>=1.66.0
